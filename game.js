@@ -295,11 +295,18 @@
   }
 
   // Plays a clip; resolves true once it is playing, false if it can't play.
-  function playClip(url, hooks = {}) {
+  // `reuse` plays on an existing <audio> element. Phones only let an element
+  // play after a tap, but once allowed it can keep playing new clips, so
+  // follow-up sounds (like the robot letter) reuse the element.
+  function playClip(url, hooks = {}, reuse = null) {
     stopClip();
     return new Promise((resolve) => {
       if (!url || brokenClips.has(url)) return resolve(false);
-      const a = new Audio(url);
+      const a = reuse || new Audio();
+      if (a._listeners) a._listeners.abort(); // drop handlers from its last clip
+      a._listeners = new AbortController();
+      const signal = a._listeners.signal;
+      a.src = url;
       currentClip = a;
       let settled = false;
       const settle = (ok) => { if (!settled) { settled = true; resolve(ok); } };
@@ -310,17 +317,17 @@
       a.addEventListener("playing", () => {
         if (hooks.onPlaying) hooks.onPlaying(a);
         settle(true);
-      }, { once: true });
+      }, { once: true, signal });
       a.addEventListener("ended", () => {
         finish();
-        if (hooks.onComplete) hooks.onComplete(); // played all the way through
-      }, { once: true });
-      a.addEventListener("pause", () => { if (currentClip !== a) finish(); }, { once: true });
+        if (hooks.onComplete) hooks.onComplete(a); // played all the way through
+      }, { once: true, signal });
+      a.addEventListener("pause", () => { if (currentClip !== a) finish(); }, { once: true, signal });
       a.addEventListener("error", () => {
         brokenClips.add(url);
         finish();
         settle(false);
-      }, { once: true });
+      }, { once: true, signal });
       const p = a.play();
       if (p && p.catch) p.catch(() => { finish(); settle(false); });
     });
@@ -489,12 +496,12 @@
       return;
     }
     if (SOUNDS.prompt) {
-      // Recorded "Find the letter..." then the computer voice says the letter.
+      // Recorded "Find the letter..." then the robot voice says the letter.
       playClip(soundUrl(SOUNDS.prompt), {
         onPlaying: (el) => setTalking(true, hippoChild, el),
         onEnded: () => setTalking(false),
-        onComplete: () => {
-          if (target === forLetter && !locked) speakPrompt(`${forLetter}!`);
+        onComplete: (el) => {
+          if (target === forLetter && !locked) playRobotLetter(forLetter, el);
         },
       }).then((ok) => {
         if (!ok && target === forLetter) speakPrompt();
@@ -503,6 +510,18 @@
     }
     stopClip();
     speakPrompt();
+  }
+
+  // Robot voice saying one letter: sounds/robot/G.wav, played on the same
+  // element as the prompt recording. Falls back to the browser's voice.
+  const robotUrl = (letter) => soundUrl(`robot/${letter}.wav`);
+  function playRobotLetter(letter, el) {
+    playClip(robotUrl(letter), {
+      onPlaying: (a) => setTalking(true, hippoChild, a),
+      onEnded: () => setTalking(false),
+    }, el).then((ok) => {
+      if (!ok && target === letter && !locked) speakPrompt(`${letter}!`);
+    });
   }
 
   function speakPrompt(text = `Find the letter, ${target}!`) {
@@ -557,6 +576,7 @@
 
   // One letter, found TOTAL_ROUNDS times in a row
   function startGame(letter) {
+    loadEnvelope(robotUrl(letter)); // so the mouth matches the robot letter
     stars = 0;
     renderStars(false);
     startRound(letter);
