@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>AlphaLearn</title>
+  <meta name="theme-color" content="#bfe6ff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="AlphaLearn">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Sky decorations -->
+  <div class="sky" aria-hidden="true">
+    <div class="cloud c1"></div>
+    <div class="cloud c2"></div>
+    <div class="cloud c3"></div>
+    <div class="sun"></div>
+  </div>
+
+  <!-- Parent screen -->
+  <section id="parent" class="screen active">
+    <h1 class="title" aria-label="AlphaLearn">
+      <span>A</span><span>l</span><span>p</span><span>h</span><span>a</span><span>L</span><span>e</span><span>a</span><span>r</span><span>n</span>
+    </h1>
+    <div class="parent-main">
+      <button id="hippoParent" class="hippo waving hippo-help" aria-label="Hear how to play">
+        <span class="tap-me" hidden>Tap me!</span>
+      </button>
+      <div class="parent-card">
+        <p id="parentMsg" class="big">Grown-ups: pick a level!</p>
+        <p class="sub">Your little one will find it 5 times in a row.</p>
+        <div class="modes" role="group" aria-label="Difficulty">
+          <button class="mode" data-mode="4">Easy · 4</button>
+          <button class="mode" data-mode="6">Hard · 6</button>
+        </div>
+        <div class="links">
+          <button id="musicBtn" class="link-btn" hidden>🎵 Music: on</button>
+        </div>
+        <div id="keypad" class="keypad" hidden></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Child screen -->
+  <section id="child" class="screen">
+    <div class="topbar">
+      <div class="stars" data-stars aria-label="Stars"></div>
+      <button id="homeBtn" class="corner-btn" aria-label="Back to grown-up screen">🏠</button>
+    </div>
+    <div id="grid" class="grid"></div>
+    <div class="hippo-row">
+      <div class="hippo-wrap">
+        <div class="puff" aria-hidden="true"><span></span><span></span><span></span></div>
+        <div id="hippoChild" class="hippo" aria-hidden="true"></div>
+      </div>
+      <button id="sayBtn" class="bubble" aria-label="Say it again">🔊</button>
+    </div>
+  </section>
+
+  <!-- Finish screen -->
+  <section id="finish" class="screen">
+    <div class="finish-main">
+      <h2 class="finish-title">You did it! 🎉</h2>
+      <div class="stars big-stars" data-stars aria-label="Stars"></div>
+      <div id="hippoFinish" class="hippo" aria-hidden="true"></div>
+      <button id="playAgain" class="play-again">Play again</button>
+    </div>
+  </section>
+
+  <!-- Shown only if the browser blocks music until the first tap -->
+  <div id="startOverlay" class="start-overlay" hidden>
+    <button class="start-btn">▶ Tap to start</button>
+  </div>
+
+  <!-- Water with peeking hippos -->
+  <div class="water" aria-hidden="true">
+    <div class="lily l1"></div>
+    <div class="lily l2"></div>
+    <div class="lily l3"></div>
+    <div class="peek-window p1"><div class="peeker"></div></div>
+    <div class="peek-window p2"><div class="peeker"></div></div>
+  </div>
+
+  <script src="sounds/sounds.js"></script>
+  <script src="game.js"></script>
+</body>
+</html>
